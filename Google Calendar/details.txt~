@@ -1,0 +1,24 @@
+I tried to set up google calendar in the following emulators - Nexus S 2.2, Nexus S 4.2 & in Google API Level 18, to test the calendar application in emulator but Google account was not added in those emulators.
+
+Below are the some of the notable points,
+
+1) In Android 2.2 emulator, there is no calendar and I tried to add a gmail account in the emulator to add/sync the google calendar in emulator. But at the end, the below error message was displayed - "This Server required features your phone doesnot support"
+
+2) Later I have created one more emulator (i.e., Android 4.2). Calendar is present in this emulator but before we can add an event into it, we have to add atleast one Calendar account to our device, so I tried to add my gmail account in this emulator,  but i am not able to config the Gmail Account details using Add account. If I clicks the ADD ACCOUNT button, there is no response from the Emulator.
+
+3) And as per the suggestions given in the below link by user (who faced the same problem as I mentioned in step 2), I created one more emulator and choosen google api's (17) for the target settings when setting up the emulator. 
+
+http://stackoverflow.com/questions/13876576/add-account-is-not-working-in-my-android-emulator
+
+When I tried to add my gmail account in the emulator to add google calendar account in the emulator,  at the end of verification page the below error message was displayed - "You don't have permission to sync with this server. Contact your server's administrator for more information"
+
+4) In the below link it was mentioned that "Starting January 30, 2013, consumers won't be able to set up new devices using Google Sync, however, existing Google Sync connections will continue to function.". May be this is the reason I am not able to add google calendar account in the emulators.
+
+https://support.google.com/a/answer/2716936?hl=en
+
+
+Referrence:-
+-------------
+I used the below link to add gmail account in emulator.
+
+http://www.grokkingandroid.com/using-a-google-account-in-the-emulator/

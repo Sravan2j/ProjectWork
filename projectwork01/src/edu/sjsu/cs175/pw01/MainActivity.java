@@ -5,8 +5,10 @@ import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -42,6 +44,7 @@ class MyCalendar {
 public class MainActivity extends Activity {
     private Spinner m_spinner_calender;
     private Button m_button_getEvents;
+    private Button m_button_createCal;
     private String m_selectedCalendarId = "0";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,13 +54,47 @@ public class MainActivity extends Activity {
         populateCalendarSpinner();
         final Quiz quiz = new Quiz();
 
+        m_button_createCal = (Button) findViewById(R.id.button2);
+        m_button_createCal.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {                
+                ContentValues l_event = new ContentValues();
+                l_event.put("account_name", "sampleCalendar");
+                l_event.put("account_type", "LOCAL");                  
+                l_event.put("name", "Cinequest Calendar");
+                //l_event.put("displayName", "Cinequest Calendar");
+                //l_event.put("color", 0xffff0000);
+                //l_event.put("access_level",  700);
+                //l_event.put("timezone", TimeZone.getDefault().getID());
+                l_event.put("calendar_displayName", "Cinequest Calendar");
+                l_event.put("calendar_color", 0xffff0000);
+                l_event.put("calendar_access_level",  700);
+                l_event.put("calendar_timezone", TimeZone.getDefault().getID());
+                l_event.put("ownerAccount", "owner");
+                l_event.put("visible", 1);
+
+                Uri l_eventUri;
+                if (Build.VERSION.SDK_INT >= 8) {
+                    l_eventUri = Uri.parse("content://com.android.calendar/calendars");
+                } else {
+                    l_eventUri = Uri.parse("content://calendar/calendars");                    
+                }
+                Uri.Builder builder = l_eventUri.buildUpon();
+                builder.appendQueryParameter("account_name", "sampleCalendar");
+                builder.appendQueryParameter("account_type", "LOCAL");                
+                builder.appendQueryParameter( "caller_is_syncadapter", "true");
+                Uri uri = getContentResolver().insert(builder.build(), l_event);                                
+                Log.v("++++++test", uri.toString());                
+            }
+        });
+
 
         m_button_getEvents = (Button) findViewById(R.id.button1);
         m_button_getEvents.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {                
                 Intent intent = new Intent(MainActivity.this, GetEvents.class);
-                
+
                 intent.putExtra("calendar_id", m_selectedCalendarId);
                 startActivity(intent);
             }
@@ -216,11 +253,11 @@ public class MainActivity extends Activity {
      */
     /*retrieve a list of available calendars*/
     private MyCalendar m_calendars[];
-    
+
     private void getCalendars() {
         String[] l_projection = new String[]{"_id", "calendar_displayName"};
         Uri l_calendars;
-        
+
         if (Build.VERSION.SDK_INT >= 8) {
             l_calendars = Uri.parse("content://com.android.calendar/calendars");
         } else {
@@ -260,5 +297,4 @@ public class MainActivity extends Activity {
             public void onNothingSelected(AdapterView<?> arg0) {}
         });
     }
-
 }

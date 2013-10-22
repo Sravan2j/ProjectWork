@@ -84,6 +84,7 @@ public class GetEvents extends Activity {
             while (l_managedCursor.moveToNext());
             //m_text_event.setText(l_displayText.toString());
         }
+
         ArrayAdapter<EventData> adapter = new ArrayAdapter<EventData>(
                 this.getApplicationContext(), R.layout.event_details, Collections.unmodifiableList(events)) {
             @Override

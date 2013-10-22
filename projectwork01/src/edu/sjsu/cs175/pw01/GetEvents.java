@@ -17,7 +17,10 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.CheckedTextView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -43,8 +46,8 @@ class EventData {
 }
 
 
-public class GetEvents extends Activity {
-
+public class GetEvents extends Activity {    
+    ListView listView;
     private List<EventData> events = new ArrayList<EventData>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +90,7 @@ public class GetEvents extends Activity {
 
         ArrayAdapter<EventData> adapter = new ArrayAdapter<EventData>(
                 this.getApplicationContext(), R.layout.event_details, Collections.unmodifiableList(events)) {
+
             @Override
             public View getView(final int position, View v, ViewGroup parent) {
 
@@ -95,22 +99,56 @@ public class GetEvents extends Activity {
                 if (v == null) v = inflater.inflate(R.layout.event_details, null);                                
                 TextView textView = (TextView) v.findViewById(R.id.eventName);
                 textView.setText(q.getName());
-                
+
                 TextView textView1 = (TextView) v.findViewById(R.id.startTime);
                 textView1.setText(q.getStime());
-                
+
                 TextView textView2 = (TextView) v.findViewById(R.id.endTime);
-                textView2.setText(q.getEtime());                 
-                
+                textView2.setText(q.getEtime());              
+
+
                 return v;                                
             }                            
         };
-        ListView listView = (ListView) findViewById(R.id.listView2);
+        listView = (ListView) findViewById(R.id.listView2);
         listView.setAdapter(adapter);
+        listView.setItemsCanFocus(false);
+        listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+                    long arg3) {
+
+                CheckedTextView tt = (CheckedTextView) arg1.findViewById(R.id.eventName);
+                if (!tt.isChecked()) {
+                    tt.setChecked(true);
+                    //tt.setCheckMarkDrawable(android.R.drawable.checkbox_on_background);
+                } else {
+                    tt.setChecked(false);
+                    //tt.setCheckMarkDrawable(android.R.drawable.checkbox_off_background);
+                }                
+            }
+        });
+        Button b1=(Button) findViewById(R.id.button1);
+        b1.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {                                
+                ClearSelections();
+            }
+        });
+
     }
 
 
+    private void ClearSelections() {
 
+        // user has clicked clear button so uncheck all the items
+
+        int count = this.listView.getAdapter().getCount();                              
+
+    }
     /************************************************
      * utility part
      */

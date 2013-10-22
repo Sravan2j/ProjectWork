@@ -175,18 +175,19 @@ public class MainActivity extends Activity {
                             //endDate = (Date) formatter.parse(ques.getETime().substring(0, 10));
                             startDate = (Date) formatter.parse(ques.getSTime());
                             endDate = (Date) formatter.parse(ques.getETime());
+                            
 
                         } catch (ParseException e) {
                             // TODO Auto-generated catch block
                             e.printStackTrace();
                         }  
                         Log.i("Date", ques.getSTime().substring(0, 10));
-                        
+
                         //***Using Intent*********************
-                        
+
                         /*Intent intent = new Intent(Intent.ACTION_INSERT);
                         intent.setType("vnd.android.cursor.item/event");
-                        
+
                         intent.putExtra("beginTime", startDate.getTime());
                         //intent.putExtra("allDay", false);
                         //intent.putExtra("rrule", "FREQ=DAILY");
@@ -200,20 +201,21 @@ public class MainActivity extends Activity {
                             toast.show();
                         }
 
-*/
-                       //   String m_selectedCalendarId = "0";
-                        
+                         */
+                        //   String m_selectedCalendarId = "0";
+
                         //***Using Content Values**************
-                        
+
                         ContentValues l_event = new ContentValues();
                         l_event.put("calendar_id", m_selectedCalendarId);
                         l_event.put("title", ques.getText());
                         l_event.put("description", "This is a simple test for calendar api");
                         l_event.put("eventLocation", "@home");
-                        //l_event.put("dtstart", startDate.getTime()+stime);
-                        //l_event.put("dtend", endDate.getTime()+etime);
-                        l_event.put("dtstart", System.currentTimeMillis());
-                        l_event.put("dtend", System.currentTimeMillis() + 1800*1000);
+                        
+                        //l_event.put("dtstart", System.currentTimeMillis());
+                        //l_event.put("dtend", System.currentTimeMillis() + 1800*1000);
+                        l_event.put("dtstart", startDate.getTime());
+                        l_event.put("dtend", endDate.getTime());
                         l_event.put("allDay", 0);
                         //status: 0~ tentative; 1~ confirmed; 2~ canceled
                         l_event.put("eventStatus", 1);
@@ -234,7 +236,7 @@ public class MainActivity extends Activity {
                         }
                         Uri l_uri = getContentResolver().insert(l_eventUri, l_event);
                         Log.v("++++++test", l_uri.toString());
-                         
+
                         //}                        
                     }
                 });

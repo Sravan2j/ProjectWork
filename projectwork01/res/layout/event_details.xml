@@ -5,15 +5,20 @@
     android:visibility="visible"
     tools:context=".MainActivity" >
 
-    <TextView
+
+    
+    
+    <CheckedTextView
         android:id="@+id/eventName"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:text="Large Text"
+        android:text="Large Text"        
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#FF000000"
+        android:checkMark="?android:attr/listChoiceIndicatorMultiple"
+        
          />
 
     <TextView
@@ -34,5 +39,7 @@
         android:layout_below="@+id/startTime"
         android:text="   Small Text"
         android:textAppearance="?android:attr/textAppearanceSmall" />
+    
+
     
 </RelativeLayout>

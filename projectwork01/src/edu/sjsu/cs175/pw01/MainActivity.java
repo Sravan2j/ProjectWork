@@ -8,12 +8,17 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import android.app.Activity;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.CalendarContract;
+import android.provider.CalendarContract.Calendars;
+import android.provider.CalendarContract.Events;
+import android.provider.CalendarContract.Instances;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -129,6 +134,12 @@ public class MainActivity extends Activity {
                     public void onClick(View v) {
                         //Calendar cal = Calendar.getInstance(); 
                         Log.i("pw01",position+"");
+
+
+
+
+
+
                         Question ques = quiz.getQuestions().get(position);
 
                         //if (Build.VERSION.SDK_INT >= 14) {
@@ -175,7 +186,7 @@ public class MainActivity extends Activity {
                             //endDate = (Date) formatter.parse(ques.getETime().substring(0, 10));
                             startDate = (Date) formatter.parse(ques.getSTime());
                             endDate = (Date) formatter.parse(ques.getETime());
-                            
+
 
                         } catch (ParseException e) {
                             // TODO Auto-generated catch block
@@ -204,38 +215,84 @@ public class MainActivity extends Activity {
                          */
                         //   String m_selectedCalendarId = "0";
 
-                        //***Using Content Values**************
 
-                        ContentValues l_event = new ContentValues();
-                        l_event.put("calendar_id", m_selectedCalendarId);
-                        l_event.put("title", ques.getText());
-                        l_event.put("description", "This is a simple test for calendar api");
-                        l_event.put("eventLocation", "@home");
-                        
-                        //l_event.put("dtstart", System.currentTimeMillis());
-                        //l_event.put("dtend", System.currentTimeMillis() + 1800*1000);
-                        l_event.put("dtstart", startDate.getTime());
-                        l_event.put("dtend", endDate.getTime());
-                        l_event.put("allDay", 0);
-                        //status: 0~ tentative; 1~ confirmed; 2~ canceled
-                        l_event.put("eventStatus", 1);
-                        //0~ default; 1~ confidential; 2~ private; 3~ public
 
-                        //l_event.put("visibility", 1);
-                        //0~ opaque, no timing conflict is allowed; 1~ transparency, allow overlap of scheduling
-                        //l_event.put("transparency", 0);
-                        //0~ false; 1~ true
-                        l_event.put("hasAlarm", 1);
+                        //*****checking whether the event exists or not*********//
 
-                        l_event.put("eventTimezone", TimeZone.getDefault().getID());
-                        Uri l_eventUri;
-                        if (Build.VERSION.SDK_INT >= 8) {
-                            l_eventUri = Uri.parse("content://com.android.calendar/events");
-                        } else {
-                            l_eventUri = Uri.parse("content://calendar/events");
+                        long begin = startDate.getTime();
+                        long end = endDate.getTime();
+                        String[] proj = 
+                                new String[]{
+                                "_id", 
+                                "title",
+                                "dtstart", 
+                        "dtend"};
+
+                        String calSelection = 
+                                "((" + Events.CALENDAR_ID + "= ?) " +                                            
+                                        "AND (" +
+                                        "((" + Events.DTSTART + "= ?) " +
+                                        "AND (" + Events.DTEND + "= ?) " +
+                                        "AND (" + Events.TITLE + "= ?) " +
+                                        ") " +                                            
+                                        ")" +
+                                        ")";         
+                        String[] calSelectionArgs = new String[] {
+                                m_selectedCalendarId, begin+"", end+"", ques.getText()                                        
+                        }; 
+
+
+                        Uri event = Uri.parse("content://com.android.calendar/events");
+
+                        Cursor l_managedCursor = managedQuery(event, proj, calSelection, calSelectionArgs, "dtstart DESC, dtend DESC");
+
+                        if (l_managedCursor.getCount()>0) {                                                    
+                            Toast toast = Toast.makeText(getApplicationContext(), "Event already exists in calendar", Toast.LENGTH_SHORT);
+                            toast.show();                           
                         }
-                        Uri l_uri = getContentResolver().insert(l_eventUri, l_event);
-                        Log.v("++++++test", l_uri.toString());
+                        else{
+
+                            //***Using Content Values**************
+
+                            ContentValues l_event = new ContentValues();
+                            l_event.put("calendar_id", m_selectedCalendarId);
+                            l_event.put("title", ques.getText());
+                            l_event.put("description", "This is a simple test for calendar api");
+                            l_event.put("eventLocation", "@home");
+
+                            //l_event.put("dtstart", System.currentTimeMillis());
+                            //l_event.put("dtend", System.currentTimeMillis() + 1800*1000);
+                            l_event.put("dtstart", startDate.getTime());
+                            l_event.put("dtend", endDate.getTime());
+                            l_event.put("allDay", 0);
+                            //status: 0~ tentative; 1~ confirmed; 2~ canceled
+                            l_event.put("eventStatus", 1);
+                            //0~ default; 1~ confidential; 2~ private; 3~ public
+
+                            //l_event.put("visibility", 1);
+                            //0~ opaque, no timing conflict is allowed; 1~ transparency, allow overlap of scheduling
+                            //l_event.put("transparency", 0);
+                            //0~ false; 1~ true
+                            l_event.put("hasAlarm", 1);
+
+                            l_event.put("eventTimezone", TimeZone.getDefault().getID());
+                            Uri l_eventUri;
+                            if (Build.VERSION.SDK_INT >= 8) {
+                                l_eventUri = Uri.parse("content://com.android.calendar/events");
+                            } else {
+                                l_eventUri = Uri.parse("content://calendar/events");
+                            }
+                            Uri l_uri = getContentResolver().insert(l_eventUri, l_event);
+                            Log.v("++++++test", l_uri.toString());
+
+                            Toast toast = Toast.makeText(getApplicationContext(), "Event added to calendar", Toast.LENGTH_SHORT);
+                            toast.show();                           
+                        }
+
+                        //*****End of checking*******//
+
+
+
 
                         //}                        
                     }
@@ -296,7 +353,7 @@ public class MainActivity extends Activity {
         l_arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         m_spinner_calender.setAdapter(l_arrayAdapter);
         m_spinner_calender.setSelection(0);
-        
+
         m_spinner_calender.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> p_parent, View p_view,

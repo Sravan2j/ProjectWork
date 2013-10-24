@@ -271,6 +271,7 @@ public class MainActivity extends Activity {
         } else {
             l_calendars = Uri.parse("content://calendar/calendars");
         }
+        @SuppressWarnings("deprecation")
         Cursor l_managedCursor = this.managedQuery(l_calendars, l_projection, null, null, null);    //all calendars
         //Cursor l_managedCursor = this.managedQuery(l_calendars, null, null, null, null); //all calendars
         //Cursor l_managedCursor = this.managedQuery(l_calendars, l_projection, "selected=1", null, null);   //active calendars
@@ -295,6 +296,7 @@ public class MainActivity extends Activity {
         l_arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         m_spinner_calender.setAdapter(l_arrayAdapter);
         m_spinner_calender.setSelection(0);
+        
         m_spinner_calender.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> p_parent, View p_view,

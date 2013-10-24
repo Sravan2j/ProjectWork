@@ -1,5 +1,6 @@
 package edu.sjsu.cs175.pw01;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -8,6 +9,7 @@ import java.util.Date;
 import java.util.List;
 
 import android.app.Activity;
+import android.content.ContentUris;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -16,6 +18,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -25,10 +28,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 class EventData {
+    public int eid;
     public String name;
+    
     public String stime;
     public String etime;
-    public EventData(String _name, String _stime, String _etime) {
+    public EventData(int _eid,String _name, String _stime, String _etime) {
+        eid = _eid;
         name = _name;
         stime = _stime;
         etime = _etime;
@@ -42,6 +48,9 @@ class EventData {
     }
     public String getEtime() {
         return etime;
+    }
+    public int getEId() {
+        return eid;
     }    
 }
 
@@ -61,24 +70,27 @@ public class GetEvents extends Activity {
         } else {
             l_eventUri = Uri.parse("content://calendar/events");
         }
-        String[] l_projection = new String[]{"title", "dtstart", "dtend"};
+        String[] l_projection = new String[]{"_id","title", "dtstart", "dtend"};
         Cursor l_managedCursor = this.managedQuery(l_eventUri, l_projection, "calendar_id=" + m_selectedCalendarId, null, "dtstart DESC, dtend DESC");
 
         //Cursor l_managedCursor = this.managedQuery(l_eventUri, l_projection, null, null, null);
         if (l_managedCursor.moveToFirst()) {
             //int l_cnt = 0;
+            
             String l_title;
             String l_begin;
             String l_end;
-
-            int l_colTitle = l_managedCursor.getColumnIndex(l_projection[0]);
-            int l_colBegin = l_managedCursor.getColumnIndex(l_projection[1]);
-            int l_colEnd = l_managedCursor.getColumnIndex(l_projection[1]);
+            int e_id;
+            int l_colid = l_managedCursor.getColumnIndex(l_projection[0]);
+            int l_colTitle = l_managedCursor.getColumnIndex(l_projection[1]);
+            int l_colBegin = l_managedCursor.getColumnIndex(l_projection[2]);
+            int l_colEnd = l_managedCursor.getColumnIndex(l_projection[3]);
             do {
+                e_id = l_managedCursor.getInt(l_colid);
                 l_title = l_managedCursor.getString(l_colTitle);
                 l_begin = getDateTimeStr(l_managedCursor.getString(l_colBegin));
                 l_end = getDateTimeStr(l_managedCursor.getString(l_colEnd));
-                EventData edata= new EventData(l_title, l_begin, l_end);
+                EventData edata= new EventData(e_id, l_title, l_begin, l_end);
                 events.add(edata);
                 //l_displayText.append(l_title + "\n" + l_begin + "\n" + l_end + "\n----------------\n");
                 //++l_cnt;
@@ -89,13 +101,13 @@ public class GetEvents extends Activity {
         }
 
         ArrayAdapter<EventData> adapter = new ArrayAdapter<EventData>(
-                this.getApplicationContext(), R.layout.event_details, Collections.unmodifiableList(events)) {
-
+                //this.getApplicationContext(), R.layout.event_details, Collections.unmodifiableList(events)) {
+              this.getApplicationContext(), R.layout.event_details, events) {
             @Override
             public View getView(final int position, View v, ViewGroup parent) {
 
                 LayoutInflater inflater = LayoutInflater.from(getContext());
-                EventData q = getItem(position);                                
+                final EventData q = getItem(position);                                
                 if (v == null) v = inflater.inflate(R.layout.event_details, null);                                
                 TextView textView = (TextView) v.findViewById(R.id.eventName);
                 textView.setText(q.getName());
@@ -105,6 +117,25 @@ public class GetEvents extends Activity {
 
                 TextView textView2 = (TextView) v.findViewById(R.id.endTime);
                 textView2.setText(q.getEtime());              
+                Button button1 = (Button) v.findViewById(R.id.remove);
+                button1.setOnClickListener( new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Uri eventUri;                    
+                        if (Build.VERSION.SDK_INT >= 8) {
+                            eventUri = Uri.parse("content://com.android.calendar/events");
+                        } else {
+                            eventUri = Uri.parse("content://calendar/events");
+                        }                        
+                            Uri deleteUri = ContentUris.withAppendedId(eventUri, q.getEId());
+                            int rows = getContentResolver().delete(deleteUri, null, null);
+                            Log.i("DEBUG_TAG", "Rows deleted: " + rows);                          
+                            if (rows==1){
+                                events.remove(position);
+                                listView.invalidateViews();
+                            }
+                    }
+                });
 
 
                 return v;                                
@@ -130,25 +161,10 @@ public class GetEvents extends Activity {
                 }                
             }
         });
-        Button b1=(Button) findViewById(R.id.button1);
-        b1.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {                                
-                ClearSelections();
-            }
-        });
 
     }
 
 
-    private void ClearSelections() {
-
-        // user has clicked clear button so uncheck all the items
-
-        int count = this.listView.getAdapter().getCount();                              
-
-    }
     /************************************************
      * utility part
      */
